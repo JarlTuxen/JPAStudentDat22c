@@ -1,7 +1,9 @@
 package dk.kea.jpastudentdat22c.dto;
 
 import dk.kea.jpastudentdat22c.model.Student;
+import org.springframework.stereotype.Component;
 
+@Component
 public class StudentConverter {
     public Student toEntity(StudentDTO studentDTO){
         return new Student(
@@ -12,7 +14,7 @@ public class StudentConverter {
         );
     }
 
-    public StudentDTO toStudentDTO(Student student){
+    public StudentDTO toDTO(Student student){
         return new StudentDTO(
                 student.getId(),
                 student.getName(),

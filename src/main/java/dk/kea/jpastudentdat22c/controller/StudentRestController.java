@@ -1,5 +1,7 @@
 package dk.kea.jpastudentdat22c.controller;
 
+import dk.kea.jpastudentdat22c.dto.StudentConverter;
+import dk.kea.jpastudentdat22c.dto.StudentDTO;
 import dk.kea.jpastudentdat22c.model.Student;
 import dk.kea.jpastudentdat22c.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,25 +20,35 @@ public class StudentRestController {
     @Autowired
     StudentRepository studentRepository;
 
+    @Autowired
+    StudentConverter studentConverter;
+
     @GetMapping("/students")
-    public List<Student> getAllStudents(){
-       List<Student> lst = studentRepository.findAll();
-       return lst;
+    public List<StudentDTO> getAllStudents(){
+       List<Student> studentList = studentRepository.findAll();
+       List<StudentDTO> studentDTOList = new ArrayList<>();
+       studentList.forEach(s -> {
+           studentDTOList.add(studentConverter.toDTO(s));
+       });
+       return studentDTOList;
     }
 
     @PostMapping("/student")
     @ResponseStatus(HttpStatus.CREATED)
-    public Student postStudent(@RequestBody Student student){
+    public StudentDTO postStudent(@RequestBody StudentDTO studentDTO){
+        Student student = studentConverter.toEntity(studentDTO);
         student.setId(0); //sikr at ny student oprettes - undgå overskrivning af eksisterende
+        studentRepository.save(student);
         System.out.println(student);
-        return studentRepository.save(student);
+        return studentConverter.toDTO(student);
     }
 
     @GetMapping("/student/{id}")
-    public ResponseEntity<Student> getStudentById(@PathVariable("id") int id){
+    public ResponseEntity<StudentDTO> getStudentById(@PathVariable("id") int id){
         Optional<Student> optionalStudent = studentRepository.findById(id);
         if (optionalStudent.isPresent()){
-            return ResponseEntity.ok(optionalStudent.get());
+            Student student = optionalStudent.get();
+            return ResponseEntity.ok(studentConverter.toDTO(student));
         }
         else {
             return ResponseEntity.notFound().build();
@@ -43,13 +56,14 @@ public class StudentRestController {
     }
 
     @PutMapping("/student/{id}")
-    public ResponseEntity<Student> putStudent(@PathVariable("id") int id, @RequestBody Student student){
+    public ResponseEntity<StudentDTO> putStudent(@PathVariable("id") int id, @RequestBody StudentDTO studentDTO){
         Optional<Student> optionalStudent = studentRepository.findById(id);
         if (optionalStudent.isPresent()){
+            Student student = studentConverter.toEntity(studentDTO);
             student.setId(id); //sikr at id fra path bruges til update
             studentRepository.save(student);
             //return new ResponseEntity<>(student, HttpStatus.OK);
-            return ResponseEntity.ok(student);
+            return ResponseEntity.ok(studentConverter.toDTO(student));
         }
         else {
             //return new ResponseEntity<>(new Student(), HttpStatus.NOT_FOUND);
