@@ -24,11 +24,11 @@ public class Student {
     private LocalDate bornDate;
     private LocalTime bornTime;
 
-    public Student(String name, LocalDate bornDate, LocalTime bornTime) {
+    /*public Student(String name, LocalDate bornDate, LocalTime bornTime) {
         this.name = name;
         this.bornDate = bornDate;
         this.bornTime = bornTime;
-    }
+    }*/
 
     /*public Student() {
     }*/
