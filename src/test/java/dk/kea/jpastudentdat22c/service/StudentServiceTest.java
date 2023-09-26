@@ -1,6 +1,7 @@
 package dk.kea.jpastudentdat22c.service;
 
 import dk.kea.jpastudentdat22c.dto.StudentDTO;
+import dk.kea.jpastudentdat22c.exception.StudentNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,6 +27,6 @@ class StudentServiceTest {
     void getStudentById() {
         StudentDTO studentDTO = studentService.getStudentById(1);
         assertEquals("Sigurd", studentDTO.name());
-        //assertThrows()
+        assertThrows(StudentNotFoundException.class, () -> studentService.getStudentById(27));
     }
 }
