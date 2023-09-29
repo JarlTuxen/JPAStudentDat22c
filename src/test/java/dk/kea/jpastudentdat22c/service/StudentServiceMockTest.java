@@ -7,9 +7,12 @@ import dk.kea.jpastudentdat22c.model.Student;
 import dk.kea.jpastudentdat22c.repository.StudentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -20,6 +23,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 @SpringBootTest
 class StudentServiceMockTest {
@@ -27,7 +34,7 @@ class StudentServiceMockTest {
     @Mock
     private StudentRepository mockedStudentRepository;
 
-    //autowired dependencies in studentservice does not initialise when using mock
+    //autowired dependencies in studentservice does not initialise when using InjectMocks
     //@InjectMocks
     StudentService studentService;
 
@@ -56,6 +63,26 @@ class StudentServiceMockTest {
         Mockito.when(mockedStudentRepository.findById(1)).thenReturn(Optional.of(s1));
         Mockito.when(mockedStudentRepository.findById(42)).thenReturn(Optional.empty());
 
+        // Define the behavior using thenAnswer
+        Mockito.when(mockedStudentRepository.save(ArgumentMatchers.any(Student.class))).thenAnswer(new Answer<Student>() {
+            @Override
+            public Student answer(InvocationOnMock invocation) throws Throwable {
+                // Extract the student object passed as an argument to the save method
+                Object[] arguments = invocation.getArguments();
+                if (arguments.length > 0 && arguments[0] instanceof Student) {
+                    Student studentToSave = (Student) arguments[0];
+                    //repository skal returnere studentobject med næste ledige id = 3
+                    studentToSave.setId(3);
+                    return studentToSave;
+                } else {
+                    // Handle the case where the argument is not a Student (optional)
+                    throw new IllegalArgumentException("Invalid argument type");
+                }
+            }
+        });
+
+// Now you can use your mocked StudentRepository for testing
+
         studentService = new StudentService(mockedStudentRepository, studentConverter);
 
     }
@@ -81,13 +108,25 @@ class StudentServiceMockTest {
     @Test
     void createStudent() {
         //kald studentService.save og assertEquals på studentDTO - husk init Mockito.when.thenReturn
+        StudentDTO resultStudentDTO = studentService.createStudent(studentConverter.toDTO(
+                new Student(
+                0,
+                "Hugo",
+                LocalDate.of(2000,1,1),
+                LocalTime.of(0, 0, 1)
+        )));
+        assertEquals(3, resultStudentDTO.id());
     }
 
     @Test
     void updateStudent() {
+        //kald studentService.save og assertEquals på studentDTO - husk init Mockito.when.thenReturn
+        //lav test for eksisterende og ikke eksisterende student (assertThrows)
     }
 
     @Test
     void deleteStudentById() {
+        //kald studentService.delete
+        //test at der kommer StudentNotFoundException for ikke-eksisterende student
     }
 }
