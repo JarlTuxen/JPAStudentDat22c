@@ -30,8 +30,8 @@ public class StudentRestController {
 
     @GetMapping("/student/{id}")
     public ResponseEntity<StudentDTO> getStudentById(@PathVariable("id") int id){
-        StudentDTO studentDTO = studentService.getStudentById(id);
-        return ResponseEntity.ok(studentDTO);
+            StudentDTO studentDTO = studentService.getStudentById(id);
+            return ResponseEntity.ok(studentDTO);
     }
 
     @PutMapping("/student/{id}")
